@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title> Calculation Service</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+        <style>
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+            :root{
+                --bg: black;
+                --red: #ee2727;
+                --txt: white;
+                --surface: #2E2E2E;
+                --border: #404040;
+                --sub_txt: #9C9C9C;
+                --mono: 'DM Mono', monospace;
+                --sans: 'DM Sans', sans-serif;
+            }
+
+            body{
+                background: var(--bg);
+                color: var(--txt);
+                font-family: var(--sans);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 42px 21px 84px;
+            }
+            
+            header {
+                width: 100%;
+                max-width: 1000px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 50px;
+            }
+
+            .logo {
+                font-family: var(--sans);
+                font-size: 1.5rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--red);
+            }
+            .logo span { color: var(--txt); }
+
+
+            .api-badge {
+                font-family: var(--mono);
+                font-size: 0.8rem;
+                color: var(--sub_txt);
+                border: 1px solid var(--border);
+                padding: 4px 8px;
+                border-radius: 2px; 
+            }
+            .api-badge a {color: var(--sub_txt);}
+            .api-badge a:hover {color: var(--txt);}
+
+            .title-block{
+                width: 100%;
+                max-width: 1000px;
+                margin-bottom: 50px;
+            }
+
+            .title-block h1 {
+                font-size: 2rem;
+                font-weight: 400;
+            }
+
+            .title-block h1 strong {font-weight: 500;}
+
+            .title-block p {
+                color: var(--sub_txt);
+                font-size: 1rem;
+                margin-top: 20px;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 40px;
+                width: 100%;
+                max-width: 1000px;
+            }
+            @media (max-width: 500px) {
+                .grid {grid-template-columns: 1fr;}
+            }
+
+            .card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 20px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                transition: border-color 0.2s;
+            }
+            .card:focus-within {border-color: var(--red);}
+
+            .card-tag{
+                font-family: var(--sans);
+                font-size: 1.rem;
+                font-weight: 700;
+                color: var(--red);
+                text-transform: uppercase;
+            }
+            .card-tag p { color: var(--txt); }
+            
+            .card h2 {
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+            .card p {
+                font-size: 0.84rem;
+                color: var(--sub_txt);
+                flex: 1;
+            }
+            .input-row {
+                display: flex;
+                gap: 10px;
+            }
+            input[type="number"], input[type="text"]{
+                flex: 1;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 5px;
+                color: var(--txt);
+                font-family: sans-serif;
+                font-size: 0.8rem;
+                padding: 10px 10px;
+                outline: none;
+                transition: border-color 0.15s;
+                appearance: auto;
+            }
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button { -webkit-appearance: none; }
+            input:focus { border-color: var(--red); }
+            input::placeholder { color: #444; }
+
+            .loan-inputs { display: flex; flex-direction: column; gap: 10px; }
+            .loan-inputs label {
+            font-size: 0.8rem;
+            color: var(--sub_txt);
+            margin-bottom: 0px;
+            }
+
+            button{
+                background: var(--red);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 15px;
+                font-family: var(--sans);
+                font-size: 0.8rem;
+                font-weight: 400;
+                cursor: pointer;
+                transition: background 0.15s, transform 0.1s;
+                white-space: nowrap;
+            }
+            button:hover { background: #ff1a26; }
+            button:active { transform: scale(1); }
+
+            .result{
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 10px 15px;
+                font-family: var(--mono);
+                font-size: 0.8rem;
+                min-height: 44px;
+                color: var(--sub_txt);
+                word-break: break-all;
+                transition: color 0.2s;
+            }
+            .result.success { color: greenyellow; border-color: darkgreen; }
+            .result.error   { color: orange; border-color: darkred; }
+            .result.loading { color: grey; font-style: italic; }
+        </style>
+    </head>
+
+    <body>
+        
+        <header>
+            <div class="logo"> Calculation <span>Service</span></div>
+            <div class="api-badge"><a href="/docs" target="_blank">API docs →</a></div>
+        </header>
+
+        <div class="title-block">
+            <h1>Developer <strong>Assignement</strong></h1>
+            <p>Fibonacci · Factorial · Loan repayment — enter a value and press Calculate.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card" id="card-fib">
+                <div class="card-tag">01 — Fibonacci</div>
+                <p>Returns the nth number of the Fibonacci sequence.</p>
+                <div class="input-row">
+                    <input type="number" id="fib-n" placeholder="n  (e.g. 10)" min="0" step="1" />
+                    <button onclick="calcFib()">Calculate</button>
+                </div>
+                <div class="result" id="fib-result">—</div>
+            </div>
+
+            <div class="card" id="card-fact">
+                <div class="card-tag">02 — Factorial</div>
+                <p>Returns the product of all positive integers up to n.</p>
+                <div class="input-row">
+                    <input type="number" id="fact-n" placeholder="n  (e.g. 5)" min="0" step="1" />
+                    <button onclick="calcFact()">Calculate</button>
+                </div>
+                <div class="result" id="fact-result">—</div>
+            </div>
+
+            <div class="card" id="card-loan">
+                <div class="card-tag">03 — Loan Repayment</div>
+                <p>Monthly repayment using an anual rate (in %).</p>
+                <div class="loan-inputs">
+                    <label>Principal (€)</label>
+                    <input type="number" id="loan-p" placeholder="e.g. 10000" min="0.01" step="0.01" />
+                    <label>Annual rate (%)</label>
+                    <input type="number" id="loan-r" placeholder="e.g. 5" min="0" step="0.01" />
+                    <label>Months</label>
+                    <input type="number" id="loan-n" placeholder="e.g. 24" min="1" step="1" />
+                </div>
+                <button onclick="calcLoan()" style="align-self: flex-start;">Calculate</button>
+                <div class="result" id="loan-result">—</div>
+            </div>
+        </div>
+
+        <script>
+            function setResult(id, text, state) {
+                const el = document.getElementById(id);
+                el.textContent = text;      
+                el.className = 'result ' + (state || '');
+            }
+
+            async function post(path, body) {
+                const res = await fetch(path, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail?.[0]?.msg || data.error || 'Error');
+                return data;
+            }
+
+            async function calcFib() {    
+                const n = document.getElementById('fib-n').value;
+                if (n === '') return setResult('fib-result', 'Please enter a value.', 'error');
+                setResult('fib-result', 'Calculating…', 'loading');
+                try {
+                    const data = await post('/fibonacci', { n: parseInt(n) });
+                    setResult('fib-result', `F(${data.n}) = ${data.result}`, 'success');
+                } catch (e) {
+                    setResult('fib-result', e.message, 'error');
+                }
+            }
+    
+            async function calcFact() {
+                const n = document.getElementById('fact-n').value;
+                if (n === '') return setResult('fact-result', 'Please enter a value.', 'error');
+                setResult('fact-result', 'Calculating…', 'loading');
+                try {
+                    const data = await post('/factorial', { n: parseInt(n) });
+                    setResult('fact-result', `${data.n}! = ${data.result}`, 'success');
+                } catch (e) {
+                    setResult('fact-result', e.message, 'error');
+                }
+            }
+    
+            async function calcLoan() {
+                const p = document.getElementById('loan-p').value;
+                const r = document.getElementById('loan-r').value;
+                const n = document.getElementById('loan-n').value;
+                if (!p || !r || !n) return setResult('loan-result', 'Please fill in all three fields.', 'error');
+                setResult('loan-result', 'Calculating…', 'loading');
+                try {
+                    const data = await post('/loan', {
+                        principal: parseFloat(p),
+                        annual_rate_percent: parseFloat(r),
+                        months: parseInt(n),
+                    });
+                    setResult('loan-result', `Monthly repayment: €${data.monthly_repayment}`, 'success');
+                } catch (e) {
+                    setResult('loan-result', e.message, 'error');
+                }
+            }
+    
+            document.getElementById('fib-n').addEventListener('keydown',  e => e.key === 'Enter' && calcFib());
+            document.getElementById('fact-n').addEventListener('keydown', e => e.key === 'Enter' && calcFact());
+            ['loan-p','loan-r','loan-n'].forEach(id =>
+            document.getElementById(id).addEventListener('keydown', e => e.key === 'Enter' && calcLoan())
+        );
+        </script>
+    </body>
+</html>
